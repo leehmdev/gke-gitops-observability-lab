@@ -40,10 +40,8 @@ The purpose of this lab is to document a realistic, production-style environment
 
 GitHub (main branch)
 │
-▼
 Argo CD
 │
-▼
 GKE Cluster (asia-northeast1-b)
 │
 ├── sample-api (NGINX)
