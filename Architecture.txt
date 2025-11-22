@@ -1,0 +1,29 @@
+gke-gitops-observability-lab/
+├─ terraform/
+│  ├─ main.tf
+│  ├─ variables.tf
+│  ├─ outputs.tf
+│  ├─ providers.tf
+│  └─ backend.tf     
+│
+├─ apps/
+│  ├─ sample-api/
+│  │  ├─ Chart.yaml
+│  │  ├─ values.yaml
+│  │  └─ templates/
+│  │     ├─ deployment.yaml
+│  │     └─ service.yaml
+│  │
+│  └─ monitoring/
+│     └─ values.yaml    # kube-prometheus-stack용 values
+│
+├─ argocd/
+│  ├─ namespace.yaml
+│  ├─ project-default.yaml
+│  ├─ app-sample-api.yaml
+│  └─ app-monitoring.yaml
+│
+└─ .github/
+   └─ workflows/
+      ├─ terraform-ci.yml
+      └─ helm-ci.yml

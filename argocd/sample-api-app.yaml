@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sample-api
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/leehmdev/gke-gitops-observability-lab.git
+    targetRevision: main
+    path: apps/sample-api
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: apps
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
