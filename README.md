@@ -1,7 +1,9 @@
 # gke-gitops-observability-lab
 
 🚀 Production-style GitOps & Observability Lab on GKE  
-A real-world architecture built with Terraform, Helm, Argo CD, Prometheus, and Grafana.
+
+A real-world architecture built with 
+**Terraform, Helm, Argo CD, Prometheus, and Grafana.**
 
 This repository is shared to document and demonstrate practical cloud-native patterns used in modern Kubernetes environments.
 
