@@ -1,8 +1,8 @@
 # GKE GitOps + Observability Lab
 
-This repository demonstrates a practical GitOps-based Kubernetes deployment on Google Kubernetes Engine (GKE), combined with full observability using Prometheus and Grafana.
+This repository demonstrates a practical **GitOps-based Kubernetes deployment on Google Kubernetes Engine (GKE)**, combined with full **observability using Prometheus and Grafana**.
 
-The goal of this project is to showcase a clean and reproducible cloud-native workflow using industry-standard tools.
+It represents a clean, production-style setup using industry-standard tools and workflows.
 
 ---
 
@@ -68,6 +68,13 @@ terraform plan
 terraform apply
 ```
 
+This creates:
+- VPC + Subnet
+- GKE Cluster in `asia-northeast1-b`
+- Required IAM / networking components
+
+---
+
 ### 2️⃣ Monitoring Stack Installation (Helm)
 
 ```bash
@@ -78,6 +85,14 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring --create-namespace
 ```
 
+Verify:
+
+```bash
+kubectl get pods -n monitoring
+```
+
+---
+
 ### 3️⃣ Sample Application Deployment (Helm)
 
 ```bash
@@ -87,33 +102,89 @@ cd apps/sample-api
 helm install sample-api . -n apps
 ```
 
-### 4️⃣ GitOps Deployment (Argo CD)
+Verify:
+
+```bash
+kubectl get pods -n apps
+kubectl get svc -n apps
+```
+
+You should see an **external IP** attached to the `sample-api` service.
+
+---
+
+## 🔄 GitOps Deployment (Argo CD)
+
+### Apply the Argo CD application
 
 ```bash
 kubectl apply -n argocd -f argocd/sample-api-app.yaml
 ```
 
-Argo CD will continuously monitor this GitHub repository and automatically sync changes to the GKE cluster.
+Argo CD will now:
+- Monitor this GitHub repository
+- Compare desired state vs actual state
+- Automatically sync Kubernetes resources
 
 ---
 
-## 📊 Observability
+## 🌐 Argo CD Web UI Access
 
-Grafana is exposed via port-forward:
+### Start port-forwarding
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Then open in browser:
+
+```
+http://localhost:8080
+```
+
+### Login details
+
+Default username:
+
+```text
+admin
+```
+
+Get the initial password:
+
+```bash
+kubectl get secret argocd-initial-admin-secret \
+  -n argocd \
+  -o jsonpath="{.data.password}" | base64 --decode ; echo
+```
+
+After login, you should see:
+
+- ✅ Application: `sample-api`
+- ✅ Status: **Synced**
+- ✅ Health: **Healthy**
+- ✅ Source: GitHub repository
+- ✅ Target: `apps` namespace in GKE
+
+---
+
+## 📊 Grafana Web UI Access (Observability)
+
+### Start port-forwarding
 
 ```bash
 kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80
 ```
 
-Access at:
+Open in browser:
 
-```
+```text
 http://localhost:3000
 ```
 
-Default user:
+Username:
 
-```
+```text
 admin
 ```
 
@@ -124,16 +195,62 @@ kubectl get secret --namespace monitoring prometheus-grafana \
   -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
+Available dashboards:
+- Kubernetes / Cluster
+- Pods / Nodes / Workloads
+- CoreDNS & Networking
+- etcd, kubelet, API server
+
+---
+
+## ✅ How to Validate GitOps is Working
+
+1) Edit this file in GitHub:
+
+```
+apps/sample-api/values.yaml
+```
+
+Example change:
+
+```yaml
+replicaCount: 3
+```
+
+2) Commit & Push to GitHub
+
+```bash
+git add apps/sample-api/values.yaml
+git commit -m "Increase replicas to 3"
+git push
+```
+
+3) In Argo CD Web UI:
+- Click **Refresh**
+- Then **Sync**
+
+4) Verify:
+
+```bash
+kubectl get pods -n apps
+```
+
+✅ You should now see **3 pods running**
+
+This confirms:
+- GitHub → Argo CD → GKE is fully working ✅
+
 ---
 
 ## ✅ Key Features
 
-- GitOps-based workload deployment
-- Real-time observability (metrics & dashboards)
-- Infrastructure as code with Terraform
-- Modular and production-like structure
-- Easy scalability via Git push
+- Real GitOps workflow using Argo CD
+- Infrastructure as Code with Terraform
+- Helm-based application deployment
+- Full observability (Prometheus + Grafana)
+- Reproducible & scalable architecture
+- Production-style structure
 
 ---
 
-This project is intended as a reference architecture for cloud-native Kubernetes environments.
+This repository is intended as a reference, learning resource, and example of best practices for GitOps-based Kubernetes operations on GCP.
