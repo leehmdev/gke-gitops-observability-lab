@@ -1,56 +1,44 @@
-# gke-gitops-observability-lab
+# GKE GitOps + Observability Lab
 
-🚀 Production-style GitOps & Observability Lab on GKE  
+This repository demonstrates a practical GitOps-based Kubernetes deployment on Google Kubernetes Engine (GKE), combined with full observability using Prometheus and Grafana.
 
-A real-world architecture built with 
-**Terraform, Helm, Argo CD, Prometheus, and Grafana.**
-
-This repository is shared to document and demonstrate practical cloud-native patterns used in modern Kubernetes environments.
-
----
-
-## 📌 Project Overview
-
-This project provisions a Google Kubernetes Engine (GKE) cluster in **asia-northeast1-b** and implements a complete cloud-native workflow:
-
-- Infrastructure as Code with Terraform
-- Application deployment using Helm
-- GitOps-based continuous delivery with Argo CD
-- Full observability using Prometheus & Grafana
-- GitHub as the Single Source of Truth
-
-The purpose of this lab is to document a realistic, production-style environment for learning, experimentation, and knowledge sharing.
+The goal of this project is to showcase a clean and reproducible cloud-native workflow using industry-standard tools.
 
 ---
 
 ## 🛠 Technologies Used
 
-- Google Kubernetes Engine (GKE)
-- Terraform
-- Helm
-- Argo CD (GitOps)
-- Prometheus
-- Grafana
-- NGINX Sample API
-- GitHub (GitOps repository)
+- **Google Kubernetes Engine (GKE)**
+- **Terraform**
+- **Helm**
+- **Argo CD (GitOps)**
+- **Prometheus**
+- **Grafana**
+- **NGINX Sample API**
+- **GitHub (GitOps repository)**
 
 ---
 
-## 🗺 Architecture Overview
+## 🏗 Architecture Overview
 
+```text
 GitHub (main branch)
 │
+▼
 Argo CD
 │
+▼
 GKE Cluster (asia-northeast1-b)
 │
 ├── sample-api (NGINX)
 └── Monitoring (Prometheus + Grafana)
+```
 
 ---
 
-Repository Structure
+## 📂 Repository Structure
 
+```text
 gke-gitops-observability-lab/
 │
 ├── terraform/                   # Terraform code to provision VPC + GKE
@@ -65,146 +53,87 @@ gke-gitops-observability-lab/
 │   └── screenshots/              # Grafana / Argo / Architecture screenshots
 │
 └── README.md
-
+```
 
 ---
 
 ## 🚀 Deployment Flow
 
-### 1) Infrastructure Provisioning (Terraform)
+### 1️⃣ Infrastructure Provisioning (Terraform)
 
+```bash
 cd terraform
+terraform init
+terraform plan
+terraform apply
+```
 
-terraform init  
-terraform plan  
-terraform apply  
+### 2️⃣ Monitoring Stack Installation (Helm)
 
-This creates:
-- VPC + Subnets
-- GKE Cluster
-- Node Pools
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
 
----
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --create-namespace
+```
 
-### 2) Application Deployment (Helm)
+### 3️⃣ Sample Application Deployment (Helm)
 
+```bash
 kubectl create namespace apps
 
-cd apps/sample-api  
-helm install sample-api . -n apps  
+cd apps/sample-api
+helm install sample-api . -n apps
+```
 
-Verify:
+### 4️⃣ GitOps Deployment (Argo CD)
 
-kubectl get pods -n apps  
-kubectl get svc -n apps  
+```bash
+kubectl apply -n argocd -f argocd/sample-api-app.yaml
+```
 
-A LoadBalancer IP will expose the NGINX application.
+Argo CD will continuously monitor this GitHub repository and automatically sync changes to the GKE cluster.
 
 ---
 
-### 3) Observability Stack (Prometheus + Grafana)
+## 📊 Observability
 
-kubectl create namespace monitoring
+Grafana is exposed via port-forward:
 
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts  
-helm repo update  
+```bash
+kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80
+```
 
-helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring  
+Access at:
 
-Grafana access:
-
-kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80  
-
-URL:  
+```
 http://localhost:3000
+```
 
-Admin password:
+Default user:
 
-kubectl -n monitoring get secret prometheus-grafana \
--o jsonpath="{.data.admin-password}" | base64 --decode
+```
+admin
+```
 
----
+Get the password:
 
-### 4) GitOps (Argo CD)
-
-Install Argo CD:
-
-kubectl create namespace argocd  
-
-kubectl apply -n argocd \
--f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml  
-
-Expose UI:
-
-kubectl port-forward -n argocd svc/argocd-server 8080:443  
-
-URL:  
-https://localhost:8080
-
-Apply application:
-
-kubectl apply -f argocd/sample-api-app.yaml  
-
-After this point, GitHub becomes the deployment controller and all changes are synchronized through Argo CD.
+```bash
+kubectl get secret --namespace monitoring prometheus-grafana \
+  -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+```
 
 ---
 
-## 🔁 GitOps Sync Example
+## ✅ Key Features
 
-Edit this file:
-
-apps/sample-api/values.yaml
-
-Change:
-
-replicaCount: 3
-
-Push change:
-
-git add apps/sample-api/values.yaml  
-git commit -m "Increase sample-api replicas to 3"  
-git push  
-
-Result:
-
-- Argo CD automatically syncs the change
-- Pod count increases
-- Grafana reflects new metrics
-- GitOps workflow confirmed
+- GitOps-based workload deployment
+- Real-time observability (metrics & dashboards)
+- Infrastructure as code with Terraform
+- Modular and production-like structure
+- Easy scalability via Git push
 
 ---
 
-## 📊 What You Can Monitor
-
-In Grafana, typical dashboards include:
-
-- Kubernetes / Pods
-- Kubernetes / Namespace
-- Kubernetes / Nodes
-- CPU & Memory usage per workload
-- Network traffic
-- Application performance
-
-This setup reflects a common real-world observability stack used in Kubernetes environments.
-
----
-
-## 💡 Why This Project Exists
-
-This repository was created to:
-
-- Practice cloud-native architectural patterns
-- Document real operational workflows
-- Explore GitOps and observability concepts
-- Share knowledge and reusable infrastructure patterns
-
-It serves as a living lab and technical reference.
-
----
-
-## 👤 Author
-
-Hyunmyung Lee  
-Cloud / Infrastructure Engineer  
-
-GitHub: https://github.com/leehmdev
+This project is intended as a reference architecture for cloud-native Kubernetes environments.
