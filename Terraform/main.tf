@@ -15,7 +15,7 @@ resource "google_compute_subnetwork" "subnet" {
 # Regional GKE Cluster in asia-northeast1
 resource "google_container_cluster" "primary" {
   name     = var.gke_cluster_name
-  location = var.region # asia-northeast1 (리전 기반 클러스터)
+  location = var.region # asia-northeast1 
 
   network    = google_compute_network.vpc.self_link
   subnetwork = google_compute_subnetwork.subnet.self_link
