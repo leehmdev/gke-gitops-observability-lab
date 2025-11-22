@@ -39,26 +39,33 @@ The purpose of this lab is to document a realistic, production-style environment
 ## 🗺 Architecture Overview
 
 GitHub (main branch)
-▼
+│
 Argo CD
-▼
+│
 GKE Cluster (asia-northeast1-b)
+│
 ├── sample-api (NGINX)
 └── Monitoring (Prometheus + Grafana)
 
 ---
 
-## 📂 Repository Structure
+Repository Structure
 
 gke-gitops-observability-lab/
+│
 ├── terraform/                   # Terraform code to provision VPC + GKE
+│
 ├── apps/
-    └── sample-api/               # Helm chart for NGINX application
+│   └── sample-api/               # Helm chart for NGINX application
+│
 ├── argocd/
-    └── sample-api-app.yaml       # Argo CD Application manifest
+│   └── sample-api-app.yaml       # Argo CD Application manifest
+│
 ├── docs/
-    └── screenshots/              # Grafana / Argo / Architecture screenshots
+│   └── screenshots/              # Grafana / Argo / Architecture screenshots
+│
 └── README.md
+
 
 ---
 
